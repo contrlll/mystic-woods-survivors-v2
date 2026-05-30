@@ -4,46 +4,53 @@ const Enemy = {
   spawnInterval: 3,
   baseSpeed: 60,
   baseHp: 3,
+  totalSpawned: 0,
 
   create(x, y, type) {
+    const stats = type === 'slime'
+      ? { hp: 2, speed: 50, width: 32, height: 32 }
+      : { hp: 4, speed: 60, width: 48, height: 48 };
     return {
-      x, y,
-      type: type || 'skeleton',
-      hp: this.baseHp,
-      maxHp: this.baseHp,
-      speed: this.baseSpeed,
-      width: 48,
-      height: 48,
+      x, y, type,
+      hp: stats.hp,
+      maxHp: stats.hp,
+      speed: stats.speed + Math.random() * 15,
+      width: stats.width,
+      height: stats.height,
       animFrame: 0,
       animTimer: 0,
       alive: true,
+      hitTimer: 0,
     };
   },
 
   spawnWave() {
-    const margin = 60;
-    for (let i = 0; i < 5; i++) {
+    const count = 3 + Math.floor(this.totalSpawned / 10);
+    for (let i = 0; i < count; i++) {
       let x, y;
       const side = Math.floor(Math.random() * 4);
       const cam = Game.camera;
       const w = Game.width;
       const h = Game.height;
+      const margin = Math.max(w, h) * 0.6;
+      const spread = Math.max(w, h) * 0.4;
       if (side === 0) {
         x = cam.x + Math.random() * w;
-        y = cam.y - margin;
+        y = cam.y - margin - Math.random() * spread;
       } else if (side === 1) {
-        x = cam.x + w + margin;
+        x = cam.x + w + margin + Math.random() * spread;
         y = cam.y + Math.random() * h;
       } else if (side === 2) {
         x = cam.x + Math.random() * w;
-        y = cam.y + h + margin;
+        y = cam.y + h + margin + Math.random() * spread;
       } else {
-        x = cam.x - margin;
+        x = cam.x - margin - Math.random() * spread;
         y = cam.y + Math.random() * h;
       }
-      const type = Math.random() < 0.5 ? 'skeleton' : 'slime';
+      const type = Math.random() < 0.4 ? 'slime' : 'skeleton';
       this.list.push(this.create(x, y, type));
     }
+    this.totalSpawned += count;
   },
 
   updateAll(dt) {
@@ -65,8 +72,9 @@ const Enemy = {
         e.x += (dx / dist) * e.speed * dt;
         e.y += (dy / dist) * e.speed * dt;
       }
+      e.hitTimer -= dt;
       e.animTimer += dt;
-      if (e.animTimer > 0.2) {
+      if (e.animTimer > 0.15) {
         e.animFrame = (e.animFrame + 1) % 3;
         e.animTimer = 0;
       }
@@ -81,16 +89,16 @@ const Enemy = {
       if (!sprite) {
         ctx.fillStyle = e.type === 'skeleton' ? '#888' : '#0a8';
         ctx.fillRect(e.x - 12, e.y - 12, 24, 24);
-        return;
+        continue;
       }
-      const frameW = e.type === 'slime' ? 32 : 48;
-      const frameH = e.type === 'slime' ? 32 : 48;
-      const sy = (3 + e.animFrame) * frameH;
-      const sx = 0;
+      const fw = e.width, fh = e.height;
+      const gridSize = e.type === 'slime' ? 32 : 48;
+      const rowOffset = 3;
+      const sy = (rowOffset + e.animFrame) * gridSize;
+      const sx = 2 * gridSize;
       ctx.drawImage(
-        sprite,
-        sx, sy, frameW, frameH,
-        e.x - frameW / 2, e.y - frameH / 2 + 4, frameW, frameH
+        sprite, sx, sy, gridSize, gridSize,
+        e.x - fw / 2, e.y - fh / 2 + 4, fw, fh
       );
     }
   },
