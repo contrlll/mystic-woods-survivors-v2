@@ -33,6 +33,8 @@ const Game = {
     const assets = {
       plains: 'assets/sprites/tilesets/plains.png',
       player: 'assets/sprites/characters/player.png',
+      skeleton: 'assets/sprites/characters/skeleton.png',
+      slime: 'assets/sprites/characters/slime.png',
     };
     let loaded = 0;
     const total = Object.keys(assets).length;
@@ -71,6 +73,7 @@ const Game = {
   update(dt) {
     if (this.state !== 'PLAYING') return;
     Player.update(dt);
+    Enemy.updateAll(dt);
   },
 
   render() {
@@ -86,6 +89,7 @@ const Game = {
     ctx.save();
     ctx.translate(-this.camera.x, -this.camera.y);
     this.renderMap(ctx);
+    Enemy.renderAll(ctx);
     Player.render(ctx);
     ctx.restore();
   },
