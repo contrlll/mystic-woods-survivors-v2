@@ -42,10 +42,18 @@ const Enemy = {
       g.bob += dt * 3;
       const dx = Player.x - g.x;
       const dy = Player.y - g.y;
+      const distSq = dx * dx + dy * dy;
       var pickupRadius = 150 + Player.magnet;
-      if (dx * dx + dy * dy < pickupRadius * pickupRadius) {
-        Player.addXp(g.value);
-        this.xpGems.splice(i, 1);
+      if (distSq < pickupRadius * pickupRadius) {
+        if (distSq < 400) {
+          Player.addXp(g.value);
+          this.xpGems.splice(i, 1);
+        } else {
+          var dist = Math.sqrt(distSq);
+          var speed = 300 + Player.magnet * 0.5;
+          g.x += (dx / dist) * speed * dt;
+          g.y += (dy / dist) * speed * dt;
+        }
       }
     }
     for (let i = this.list.length - 1; i >= 0; i--) {
