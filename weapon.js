@@ -1,7 +1,7 @@
 const Weapon = {
   projectiles: [],
   fireTimer: 0,
-  fireInterval: 0.8,
+  fireInterval: 0.04,
   damage: 1,
   range: 400,
 

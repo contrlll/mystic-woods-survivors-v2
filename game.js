@@ -31,7 +31,7 @@ const Game = {
 
   loadAssets() {
     const assets = {
-      plains: 'assets/sprites/tilesets/plains.png',
+      plains: 'assets/sprites/tilesets/grass.png',
       player: 'assets/sprites/characters/player.png',
       skeleton: 'assets/sprites/characters/skeleton.png',
       slime: 'assets/sprites/characters/slime.png',
@@ -73,7 +73,7 @@ const Game = {
     Player.x = 1500;
     Player.y = 1500;
     Weapon.damage = 1;
-    Weapon.fireInterval = 0.8;
+    Weapon.fireInterval = 0.04;
     Weapon.range = 400;
     Enemy.list = [];
     Enemy.xpGems = [];
@@ -120,21 +120,15 @@ const Game = {
   },
 
   renderMap(ctx) {
-    const plains = this.sprites.plains;
-    if (!plains || plains.width === 0) return;
-    const tileSize = 16;
-    const tilesPerRow = plains.width / tileSize;
-    const tilesPerCol = plains.height / tileSize;
-    const startX = Math.max(0, Math.floor(this.camera.x / tileSize) * tileSize);
-    const startY = Math.max(0, Math.floor(this.camera.y / tileSize) * tileSize);
-    const endX = Math.min(this.mapSize, this.camera.x + this.width + tileSize);
-    const endY = Math.min(this.mapSize, this.camera.y + this.height + tileSize);
-    for (let y = startY; y < endY; y += tileSize) {
-      for (let x = startX; x < endX; x += tileSize) {
-        const tx = (Math.floor(x / tileSize) + Math.floor(y / tileSize) * 7) % tilesPerRow;
-        const ty = (Math.floor(y / tileSize) * 3 + Math.floor(x / tileSize) * 11) % tilesPerCol;
-        ctx.drawImage(plains, tx * tileSize, ty * tileSize, tileSize, tileSize, x, y, tileSize, tileSize);
-      }
-    }
+    const grass = this.sprites.plains;
+    if (!grass || grass.width === 0) return;
+    const ts = 16;
+    const sx = Math.max(0, Math.floor(this.camera.x / ts) * ts);
+    const sy = Math.max(0, Math.floor(this.camera.y / ts) * ts);
+    const ex = Math.min(this.mapSize, this.camera.x + this.width + ts);
+    const ey = Math.min(this.mapSize, this.camera.y + this.height + ts);
+    for (let y = sy; y < ey; y += ts)
+      for (let x = sx; x < ex; x += ts)
+        ctx.drawImage(grass, 0, 0, ts, ts, x, y, ts, ts);
   },
 };
