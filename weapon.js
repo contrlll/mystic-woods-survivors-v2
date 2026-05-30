@@ -26,7 +26,7 @@ const Weapon = {
         if (!e.alive) continue;
         const dx = p.x - e.x;
         const dy = p.y - e.y;
-        const threshold = e.type === 'slime' ? 20 : 24;
+        const threshold = 20;
         if (dx * dx + dy * dy < threshold * threshold) {
           e.hp -= this.damage;
           if (e.hp <= 0) { e.alive = false; Player.kills++; Enemy.spawnXpGem(e.x, e.y, e.xp); }

@@ -5,20 +5,17 @@ const Enemy = {
   spawnInterval: 3,
   totalSpawned: 0,
 
-  create(x, y, type, difficulty) {
-    const base = type === 'slime'
-      ? { hp: 2, speed: 55, width: 32, height: 32, xp: 1 }
-      : { hp: 4, speed: 65, width: 48, height: 48, xp: 2 };
+  create(x, y, difficulty) {
     const hpMul = 1 + difficulty * 0.15;
-    const spdMul = 1 + difficulty * 0.05;
     return {
-      x, y, type,
-      hp: Math.ceil(base.hp * hpMul),
-      maxHp: Math.ceil(base.hp * hpMul),
-      speed: base.speed * spdMul + Math.random() * 10,
-      xp: base.xp + Math.floor(difficulty / 3),
-      width: base.width,
-      height: base.height,
+      x, y,
+      hp: Math.ceil(2 * hpMul),
+      maxHp: Math.ceil(2 * hpMul),
+      speed: 55 + Math.random() * 10,
+      xp: 1 + Math.floor(difficulty / 3),
+      width: 32,
+      height: 32,
+      dir: 0,
       animFrame: 0,
       animTimer: 0,
       alive: true,
@@ -49,8 +46,7 @@ const Enemy = {
         x = cam.x - margin - Math.random() * spread;
         y = cam.y + Math.random() * h;
       }
-      const type = Math.random() < 0.35 ? 'slime' : 'skeleton';
-      this.list.push(this.create(x, y, type, difficulty));
+      this.list.push(this.create(x, y, difficulty));
     }
     this.totalSpawned += count;
     this.spawnInterval = Math.max(0.8, 3 - difficulty * 0.15);
@@ -88,10 +84,15 @@ const Enemy = {
       if (dist > 0) {
         e.x += (dx / dist) * e.speed * dt;
         e.y += (dy / dist) * e.speed * dt;
+        if (Math.abs(dy) > Math.abs(dx)) {
+          e.dir = dy < 0 ? 0 : 3;
+        } else {
+          e.dir = dx < 0 ? 1 : 2;
+        }
       }
       e.animTimer += dt;
-      if (e.animTimer > 0.15) {
-        e.animFrame = (e.animFrame + 1) % 3;
+      if (e.animTimer > 0.12) {
+        e.animFrame = (e.animFrame + 1) % 5;
         e.animTimer = 0;
       }
     }
@@ -112,22 +113,38 @@ const Enemy = {
   },
 
   renderAll(ctx) {
-    for (const e of this.list) {
-      const sprite = e.type === 'skeleton'
-        ? Game.sprites.skeleton
-        : Game.sprites.slime;
-      if (!sprite || sprite.width === 0) {
-        ctx.fillStyle = e.type === 'skeleton' ? '#888' : '#0a8';
+    const sprite = Game.sprites.slime;
+    if (!sprite || sprite.width === 0) {
+      for (const e of this.list) {
+        ctx.fillStyle = '#0a8';
         ctx.fillRect(e.x - 12, e.y - 12, 24, 24);
-        continue;
       }
-      const gridSize = e.type === 'slime' ? 32 : 48;
-      const sy = (3 + e.animFrame) * gridSize;
-      const sx = 2 * gridSize;
-      ctx.drawImage(
-        sprite, sx, sy, gridSize, gridSize,
-        e.x - e.width / 2, e.y - e.height / 2, e.width, e.height
-      );
+      return;
+    }
+    const gs = 32;
+    for (const e of this.list) {
+      let row, flipped = false;
+      if (!e.alive) {
+        row = 12;
+      } else {
+        switch (e.dir) {
+          case 0: row = 5; break;
+          case 1: row = 4; flipped = true; break;
+          case 2: row = 4; break;
+          case 3: row = 6; break;
+          default: row = 0;
+        }
+      }
+      const col = e.animFrame;
+      ctx.save();
+      if (flipped) {
+        ctx.translate(e.x, e.y);
+        ctx.scale(-1, 1);
+        ctx.drawImage(sprite, col * gs, row * gs, gs, gs, -gs / 2, -gs / 2, gs, gs);
+      } else {
+        ctx.drawImage(sprite, col * gs, row * gs, gs, gs, e.x - gs / 2, e.y - gs / 2, gs, gs);
+      }
+      ctx.restore();
     }
   },
 };

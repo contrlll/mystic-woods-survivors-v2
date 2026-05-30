@@ -33,7 +33,6 @@ const Game = {
     const assets = {
       plains: 'assets/sprites/tilesets/grass.png',
       player: 'assets/sprites/characters/player.png',
-      skeleton: 'assets/sprites/characters/skeleton.png',
       slime: 'assets/sprites/characters/slime.png',
     };
     for (const [key, src] of Object.entries(assets)) {
@@ -96,7 +95,7 @@ const Game = {
       if (!e.alive) continue;
       const dx = Player.x - e.x;
       const dy = Player.y - e.y;
-      const threshold = e.type === 'slime' ? 16 : 20;
+      const threshold = 16;
       if (dx * dx + dy * dy < threshold * threshold) {
         Player.takeDamage(1);
         e.alive = false;
