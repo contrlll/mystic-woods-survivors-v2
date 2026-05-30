@@ -111,6 +111,7 @@ const Game = {
       spear: 'assets/sprites/weapons/weapon07spear.png',
       txPlant: 'assets/sprites/decor/tx_plant.png',
       txProps: 'assets/sprites/decor/tx_props.png',
+      boss: 'assets/sprites/enemies/boss.png',
     };
     for (const [key, src] of Object.entries(assets)) {
       const img = new Image();
@@ -211,6 +212,7 @@ const Game = {
     Enemy.updateAll(dt);
     WeaponManager.update(dt);
     UI.gameTime += dt;
+    if (UI.message) { UI.messageTimer -= dt; if (UI.messageTimer <= 0) { UI.message = null; } }
 
     // Regen tick every 5s
     UI._regenTimer = (UI._regenTimer || 0) + dt;
@@ -230,12 +232,25 @@ const Game = {
       const threshold = 16;
       if (dx * dx + dy * dy < threshold * threshold) {
         var dmg = 1;
-        // Armor gives chance to block
         if (Player.armor > 0 && Math.random() < Player.armor * 0.15) {
           dmg = 0;
         }
         if (dmg > 0) Player.takeDamage(dmg);
         e.alive = false;
+      }
+    }
+    // Boss contact damage (doesn't die on contact)
+    for (const e of Enemy.list) {
+      if (!e.alive || !e.isBoss) continue;
+      const dx = Player.x - e.x;
+      const dy = Player.y - e.y;
+      const threshold = 32;
+      if (dx * dx + dy * dy < threshold * threshold) {
+        var dmg = 2;
+        if (Player.armor > 0 && Math.random() < Player.armor * 0.15) {
+          dmg = 0;
+        }
+        if (dmg > 0) Player.takeDamage(dmg);
       }
     }
   },

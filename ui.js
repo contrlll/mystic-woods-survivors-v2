@@ -1,10 +1,19 @@
 const UI = {
   gameTime: 0,
   statsCache: null,
+  message: null,
+  messageTimer: 0,
+
+  showMessage: function(text, duration) {
+    this.message = text;
+    this.messageTimer = duration || 2;
+  },
 
   reset() {
     this.gameTime = 0;
     this.statsCache = null;
+    this.message = null;
+    this.messageTimer = 0;
   },
 
   render(ctx) {
@@ -12,6 +21,17 @@ const UI = {
     this.drawHpBar(ctx);
     this.drawXpBar(ctx);
     this.drawStats(ctx);
+    if (this.message) {
+      ctx.save();
+      ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      ctx.fillRect(Game.width / 2 - 120, 80, 240, 40);
+      ctx.fillStyle = '#f44';
+      ctx.font = 'bold 20px monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(this.message, Game.width / 2, 100);
+      ctx.restore();
+    }
   },
 
   drawStats(ctx) {

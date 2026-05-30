@@ -2,6 +2,18 @@ const Enemy = {
   list: [],
   xpGems: [],
 
+  createBoss: function(x, y) {
+    return {
+      x: Game.wrap(x), y: Game.wrap(y), type: 'boss', isBoss: true,
+      hp: 80, maxHp: 80,
+      speed: 40,
+      xp: 20,
+      width: 64, height: 64,
+      dir: 2, animFrame: 0, animTimer: 0,
+      alive: true,
+    };
+  },
+
   create(x, y, difficulty, type) {
     type = type || 'slime';
     const hpMul = 1 + difficulty * 0.15;
@@ -56,9 +68,10 @@ const Enemy = {
         }
       }
       e.animTimer += dt;
-      if (e.animTimer > 0.12) {
-        e.animFrame = (e.animFrame + 1) % 5;
-        e.animTimer = 0;
+      if (e.isBoss) {
+        if (e.animTimer > 0.15) { e.animFrame = (e.animFrame + 1) % 8; e.animTimer = 0; }
+      } else {
+        if (e.animTimer > 0.12) { e.animFrame = (e.animFrame + 1) % 5; e.animTimer = 0; }
       }
     }
   },
@@ -79,7 +92,9 @@ const Enemy = {
 
   renderAll(ctx) {
     for (const e of this.list) {
-      if (e.type === 'bat') {
+      if (e.isBoss) {
+        this._renderBoss(ctx, e);
+      } else if (e.type === 'bat') {
         this._renderBat(ctx, e);
       } else {
         this._renderSlime(ctx, e);
@@ -133,6 +148,32 @@ const Enemy = {
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(sprite, col * fw, row * fh, fw, fh, e.x - fw / 2, e.y - fh / 2, fw, fh);
     ctx.imageSmoothingEnabled = true;
+    ctx.restore();
+  },
+
+  _renderBoss: function(ctx, e) {
+    const sprite = Game.sprites.boss;
+    if (!sprite || sprite.width === 0) {
+      ctx.fillStyle = '#c00';
+      ctx.fillRect(e.x - 24, e.y - 24, 48, 48);
+      ctx.fillStyle = '#fff';
+      ctx.font = '10px monospace';
+      ctx.fillText('BOSS', e.x - 16, e.y);
+      return;
+    }
+    const fw = 64, fh = 64;
+    var col = e.animFrame;
+    var row = 0;
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(sprite, col * fw, row * fh, fw, fh, e.x - fw / 2, e.y - fh / 2, fw, fh);
+    ctx.imageSmoothingEnabled = true;
+    // HP bar
+    var barW = 52, barH = 6;
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx.fillRect(e.x - barW / 2, e.y - fh / 2 - 10, barW, barH);
+    ctx.fillStyle = '#e22';
+    ctx.fillRect(e.x - barW / 2 + 1, e.y - fh / 2 - 9, (barW - 2) * (e.hp / e.maxHp), barH - 2);
     ctx.restore();
   },
 };

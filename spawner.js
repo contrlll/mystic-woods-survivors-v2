@@ -6,10 +6,13 @@ const Spawner = {
   decreaseRate: 0.01,
   groupBase: 1,
   groupInterval: 15,
+  bossTimer: 0,
+  bossInterval: 60,
 
   reset() {
     this.elapsedTime = 0;
     this.timer = 0;
+    this.bossTimer = 0;
   },
 
   update(dt) {
@@ -43,6 +46,22 @@ const Spawner = {
       const difficulty = Math.floor(this.elapsedTime / 8);
       var type = Math.random() < 0.5 ? 'slime' : 'bat';
       Enemy.list.push(Enemy.create(x, y, difficulty, type));
+    }
+
+    // Boss spawn every 60s (only if none alive)
+    this.bossTimer += dt;
+    if (this.bossTimer >= this.bossInterval) {
+      this.bossTimer = 0;
+      var hasBoss = false;
+      for (var bi = 0; bi < Enemy.list.length; bi++) {
+        if (Enemy.list[bi].isBoss && Enemy.list[bi].alive) { hasBoss = true; break; }
+      }
+      if (!hasBoss) {
+        var bx = Player.x + (Math.random() - 0.5) * 600;
+        var by = Player.y + (Math.random() - 0.5) * 600;
+        Enemy.list.push(Enemy.createBoss(bx, by));
+        UI.showMessage('BOSS APPEARS!', 3);
+      }
     }
   },
 };
