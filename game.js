@@ -10,6 +10,51 @@ const Game = {
   lastTime: 0,
   accumulator: 0,
   fixedDt: 1 / 60,
+  decorations: [],
+
+  // Grass tileset: 8x8 grid of 32x32 tiles
+  GRASS_COLS: 8,
+  GRASS_ROWS: 8,
+  GRASS_TS: 32,
+
+  // Decoration definitions: { spriteKey, srcX, srcY, w, h, category }
+  DECOR_DEFS: [
+    // Trees (from TX Plant.png)
+    { key: 'txPlant', sx: 24, sy: 14, w: 113, h: 139, cat: 'tree' },
+    { key: 'txPlant', sx: 161, sy: 17, w: 97, h: 136, cat: 'tree' },
+    { key: 'txPlant', sx: 295, sy: 31, w: 79, h: 120, cat: 'tree' },
+    // Bushes
+    { key: 'txPlant', sx: 216, sy: 185, w: 47, h: 42, cat: 'bush' },
+    { key: 'txPlant', sx: 282, sy: 186, w: 39, h: 45, cat: 'bush' },
+    { key: 'txPlant', sx: 156, sy: 190, w: 38, h: 32, cat: 'bush' },
+    { key: 'txPlant', sx: 346, sy: 190, w: 40, h: 35, cat: 'bush' },
+    // Flowers
+    { key: 'txPlant', sx: 98, sy: 195, w: 27, h: 25, cat: 'flower' },
+    { key: 'txPlant', sx: 38, sy: 198, w: 22, h: 19, cat: 'flower' },
+    // Rocks/props (from TX Props.png)
+    { key: 'txProps', sx: 387, sy: 2, w: 27, h: 61, cat: 'rock' },
+    { key: 'txProps', sx: 227, sy: 9, w: 26, h: 52, cat: 'rock' },
+    { key: 'txProps', sx: 32, sy: 18, w: 32, h: 46, cat: 'rock' },
+    { key: 'txProps', sx: 160, sy: 18, w: 32, h: 46, cat: 'rock' },
+    { key: 'txProps', sx: 292, sy: 19, w: 56, h: 41, cat: 'rock' },
+    { key: 'txProps', sx: 96, sy: 30, w: 32, h: 31, cat: 'smallrock' },
+    { key: 'txProps', sx: 96, sy: 76, w: 32, h: 49, cat: 'rock' },
+    { key: 'txProps', sx: 288, sy: 87, w: 64, h: 36, cat: 'rock' },
+    { key: 'txProps', sx: 27, sy: 103, w: 41, h: 50, cat: 'rock' },
+    { key: 'txProps', sx: 288, sy: 158, w: 32, h: 57, cat: 'rock' },
+    { key: 'txProps', sx: 352, sy: 174, w: 32, h: 77, cat: 'rock' },
+    // Small rocks/pebbles
+    { key: 'txProps', sx: 165, sy: 217, w: 21, h: 34, cat: 'smallrock' },
+    { key: 'txProps', sx: 96, sy: 224, w: 27, h: 32, cat: 'smallrock' },
+    { key: 'txProps', sx: 225, sy: 239, w: 30, h: 41, cat: 'smallrock' },
+    { key: 'txProps', sx: 289, sy: 251, w: 30, h: 29, cat: 'smallrock' },
+    { key: 'txProps', sx: 164, sy: 288, w: 25, h: 27, cat: 'smallrock' },
+    { key: 'txProps', sx: 227, sy: 303, w: 26, h: 40, cat: 'smallrock' },
+    { key: 'txProps', sx: 165, sy: 348, w: 21, h: 32, cat: 'smallrock' },
+    { key: 'txProps', sx: 162, sy: 482, w: 27, h: 27, cat: 'smallrock' },
+    { key: 'txProps', sx: 68, sy: 487, w: 24, h: 19, cat: 'smallrock' },
+    { key: 'txProps', sx: 100, sy: 487, w: 24, h: 19, cat: 'smallrock' },
+  ],
 
   init() {
     this.canvas = document.getElementById('gameCanvas');
@@ -29,6 +74,12 @@ const Game = {
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   },
 
+  hash: function(x, y) {
+    var h = x * 374761393 + y * 668265263;
+    h = (h ^ (h >> 13)) * 1274126177;
+    return (h ^ (h >> 16)) & 0x7fffffff;
+  },
+
   loadAssets() {
     const assets = {
       plains: 'assets/sprites/tilesets/grass_new.png',
@@ -42,6 +93,8 @@ const Game = {
       doubleaxe: 'assets/sprites/weapons/weapon05doubleaxe.png',
       bow: 'assets/sprites/weapons/weapon06bow.png',
       spear: 'assets/sprites/weapons/weapon07spear.png',
+      txPlant: 'assets/sprites/decor/tx_plant.png',
+      txProps: 'assets/sprites/decor/tx_props.png',
     };
     for (const [key, src] of Object.entries(assets)) {
       const img = new Image();
@@ -50,10 +103,29 @@ const Game = {
     }
   },
 
+  generateDecorations: function() {
+    this.decorations = [];
+    var seed = 12345;
+    for (var i = 0; i < 300; i++) {
+      seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+      var x = (seed / 0x7fffffff) * this.mapSize;
+      seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+      var y = (seed / 0x7fffffff) * this.mapSize;
+      // Keep decorations away from player start
+      var dx = x - 1500;
+      var dy = y - 1500;
+      if (dx * dx + dy * dy < 200 * 200) { i--; continue; }
+      // Pick a random decor def
+      var def = this.DECOR_DEFS[Math.floor((seed / 0x7fffffff) * this.DECOR_DEFS.length)];
+      this.decorations.push({ x: x - def.w / 2, y: y - def.h / 2, def: def });
+    }
+  },
+
   start() {
     this.camera.x = Player.x - this.width / 2;
     this.camera.y = Player.y - this.height / 2;
     WeaponManager.reset();
+    this.generateDecorations();
     this.lastTime = performance.now();
     this.loop(this.lastTime);
   },
@@ -156,13 +228,36 @@ const Game = {
   renderMap(ctx) {
     const grass = this.sprites.plains;
     if (!grass || grass.width === 0) return;
-    const ts = 32;
+    const ts = this.GRASS_TS;
+    const gCols = this.GRASS_COLS;
     const sx = Math.max(0, Math.floor(this.camera.x / ts) * ts);
     const sy = Math.max(0, Math.floor(this.camera.y / ts) * ts);
     const ex = Math.min(this.mapSize, this.camera.x + this.width + ts);
     const ey = Math.min(this.mapSize, this.camera.y + this.height + ts);
-    for (let y = sy; y < ey; y += ts)
-      for (let x = sx; x < ex; x += ts)
-        ctx.drawImage(grass, 0, 0, ts, ts, x, y, ts, ts);
+
+    // Draw varied grass tiles
+    for (let y = sy; y < ey; y += ts) {
+      for (let x = sx; x < ex; x += ts) {
+        var tileX = Math.floor(x / ts);
+        var tileY = Math.floor(y / ts);
+        var h = this.hash(tileX, tileY);
+        var gx = (h % gCols) * ts;
+        var gy = (Math.floor(h / gCols) % this.GRASS_ROWS) * ts;
+        ctx.drawImage(grass, gx, gy, ts, ts, x, y, ts, ts);
+      }
+    }
+
+    // Draw decorations
+    var cx = this.camera.x;
+    var cy = this.camera.y;
+    var cw = this.width;
+    var ch = this.height;
+    for (var i = 0; i < this.decorations.length; i++) {
+      var d = this.decorations[i];
+      if (d.x + d.def.w < cx || d.x > cx + cw || d.y + d.def.h < cy || d.y > cy + ch) continue;
+      var sprite = this.sprites[d.def.key];
+      if (!sprite || sprite.width === 0) continue;
+      ctx.drawImage(sprite, d.def.sx, d.def.sy, d.def.w, d.def.h, d.x, d.y, d.def.w, d.def.h);
+    }
   },
 };
