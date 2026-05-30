@@ -272,17 +272,19 @@ const Game = {
     UI.render(ctx);
   },
 
-  renderMap(ctx) {
-    const grass = this.sprites.plains;
-    if (!grass || grass.width === 0) return;
-    const ts = this.GRASS_TS;
-    const gCols = this.GRASS_COLS;
-    const ms = this.mapSize;
-    const numTiles = Math.floor(ms / ts);
-    const sx = Math.max(0, Math.floor(this.camera.x / ts) * ts);
-    const sy = Math.max(0, Math.floor(this.camera.y / ts) * ts);
-    const ex = Math.min(ms, this.camera.x + this.width + ts);
-    const ey = Math.min(ms, this.camera.y + this.height + ts);
+    renderMap(ctx) {
+        const grass = this.sprites.plains;
+        if (!grass || grass.width === 0) return;
+        const ts = this.GRASS_TS;
+        const gCols = this.GRASS_COLS;
+        const ms = this.mapSize;
+        const numTiles = Math.floor(ms / ts);
+        // Increased buffer to prevent visible world loading
+        const buffer = ts * 3; // Render 3 tiles beyond visible area
+        const sx = Math.max(0, Math.floor((this.camera.x - buffer) / ts) * ts);
+        const sy = Math.max(0, Math.floor((this.camera.y - buffer) / ts) * ts);
+        const ex = Math.min(ms, this.camera.x + this.width + buffer + ts);
+        const ey = Math.min(ms, this.camera.y + this.height + buffer + ts);
 
     for (let y = sy; y < ey; y += ts) {
       for (let x = sx; x < ex; x += ts) {
