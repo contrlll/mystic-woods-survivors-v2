@@ -44,6 +44,8 @@ const Game = {
   },
 
   start() {
+    this.camera.x = Player.x - this.width / 2;
+    this.camera.y = Player.y - this.height / 2;
     this.lastTime = performance.now();
     this.loop(this.lastTime);
   },
@@ -104,6 +106,8 @@ const Game = {
   render() {
     const ctx = this.ctx;
     ctx.clearRect(0, 0, this.width, this.height);
+    ctx.fillStyle = '#1a2a1a';
+    ctx.fillRect(0, 0, this.width, this.height);
     ctx.save();
     ctx.translate(-this.camera.x, -this.camera.y);
     this.renderMap(ctx);
@@ -117,7 +121,7 @@ const Game = {
 
   renderMap(ctx) {
     const plains = this.sprites.plains;
-    if (!plains) return;
+    if (!plains || plains.width === 0) return;
     const tileSize = 16;
     const tilesPerRow = plains.width / tileSize;
     const tilesPerCol = plains.height / tileSize;

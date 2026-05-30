@@ -58,7 +58,7 @@ const Player = {
 
   render(ctx) {
     const sprite = Game.sprites.player;
-    if (!sprite) {
+    if (!sprite || sprite.width === 0) {
       ctx.fillStyle = '#0f0';
       ctx.fillRect(this.x - 12, this.y - 12, 24, 24);
       return;

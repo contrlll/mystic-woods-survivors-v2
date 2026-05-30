@@ -117,7 +117,7 @@ const Enemy = {
       const sprite = e.type === 'skeleton'
         ? Game.sprites.skeleton
         : Game.sprites.slime;
-      if (!sprite) {
+      if (!sprite || sprite.width === 0) {
         ctx.fillStyle = e.type === 'skeleton' ? '#888' : '#0a8';
         ctx.fillRect(e.x - 12, e.y - 12, 24, 24);
         continue;
