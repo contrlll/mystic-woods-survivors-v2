@@ -42,7 +42,7 @@ const Enemy = {
       g.bob += dt * 3;
       const dx = Player.x - g.x;
       const dy = Player.y - g.y;
-      var pickupRadius = 30 + Player.magnet;
+      var pickupRadius = 150 + Player.magnet;
       if (dx * dx + dy * dy < pickupRadius * pickupRadius) {
         Player.addXp(g.value);
         this.xpGems.splice(i, 1);
