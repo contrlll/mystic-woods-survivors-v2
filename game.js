@@ -45,6 +45,7 @@ const Game = {
   start() {
     this.camera.x = Player.x - this.width / 2;
     this.camera.y = Player.y - this.height / 2;
+    WeaponManager.reset();
     this.lastTime = performance.now();
     this.loop(this.lastTime);
   },
@@ -72,14 +73,10 @@ const Game = {
     Player.maxHp = 10;
     Player.x = 1500;
     Player.y = 1500;
-    Weapon.damage = 1;
-    Weapon.fireInterval = 0.04;
-    Weapon.range = 400;
     Enemy.list = [];
     Enemy.xpGems = [];
     Spawner.reset();
-    Weapon.projectiles = [];
-    Weapon.fireTimer = 0;
+    WeaponManager.reset();
     UI.reset();
     this.state = 'PLAYING';
   },
@@ -89,7 +86,7 @@ const Game = {
     Player.update(dt);
     Spawner.update(dt);
     Enemy.updateAll(dt);
-    Weapon.update(dt);
+    WeaponManager.update(dt);
     UI.gameTime += dt;
     for (const e of Enemy.list) {
       if (!e.alive) continue;
@@ -112,7 +109,7 @@ const Game = {
     ctx.translate(-this.camera.x, -this.camera.y);
     this.renderMap(ctx);
     Enemy.renderAll(ctx);
-    Weapon.renderAll(ctx);
+    WeaponManager.render(ctx);
     Enemy.renderXpGems(ctx);
     Player.render(ctx);
     ctx.restore();

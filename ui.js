@@ -74,22 +74,33 @@ const UI = {
   },
 
   getRandomUpgrades(count) {
-    const all = [
+    var all = [
       { id: 'damage', name: 'Damage', icon: '+', desc: '+1 attack damage' },
-      { id: 'attackSpeed', name: 'Attack Speed', icon: '>>', desc: 'Faster projectiles' },
-      { id: 'range', name: 'Range', icon: '<->', desc: '+80 range' },
+      { id: 'attackSpeed', name: 'Attack Speed', icon: '>>', desc: '15% faster cooldown' },
+      { id: 'range', name: 'Range', icon: '<->', desc: '+40 range' },
       { id: 'speed', name: 'Move Speed', icon: '->', desc: '+20 move speed' },
       { id: 'maxHp', name: 'Max HP', icon: '*', desc: '+5 max HP & heal' },
     ];
-    const shuffled = [...all].sort(() => Math.random() - 0.5);
+    for (var key in WEAPON_FACTORIES) {
+      if (WEAPON_FACTORIES.hasOwnProperty(key) && key !== 'magicArrow' && !WeaponManager.hasWeapon(key)) {
+        var def = WEAPON_FACTORIES[key]();
+        all.push({ id: 'weapon_' + key, name: def.name, icon: def.icon, desc: 'New weapon!' });
+      }
+    }
+    var shuffled = all.slice().sort(function() { return Math.random() - 0.5; });
     return shuffled.slice(0, count);
   },
 
   applyUpgrade(id) {
+    if (id.indexOf('weapon_') === 0) {
+      var weaponId = id.substring(7);
+      WeaponManager.addWeapon(weaponId);
+      return;
+    }
     switch (id) {
-      case 'damage': Weapon.damage += 1; break;
-      case 'attackSpeed': Weapon.fireInterval = Math.max(0.2, Weapon.fireInterval - 0.15); break;
-      case 'range': Weapon.range += 80; break;
+      case 'damage': WeaponManager.globalDamage += 1; break;
+      case 'attackSpeed': WeaponManager.globalCooldownMult = Math.max(0.2, WeaponManager.globalCooldownMult * 0.85); break;
+      case 'range': WeaponManager.globalRange += 40; break;
       case 'speed': Player.speed += 20; break;
       case 'maxHp': Player.maxHp += 5; Player.hp = Player.maxHp; break;
     }
