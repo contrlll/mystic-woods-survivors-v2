@@ -190,6 +190,7 @@ const Game = {
     Player.luck = 1;
     Player.magnet = 0;
     Player.growth = 1;
+    Player.xpDiscount = 0;
     Player.armor = 0;
     Player.regen = 0;
     Player.maxHp = 10;

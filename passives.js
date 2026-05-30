@@ -9,9 +9,9 @@ var PASSIVE_DEFS = {
   DURATION:  { name: 'Spellbinder',  nameRu: 'Заклинатель',  maxLevel: 5, bonuses: { duration: 0.15 } },
   AMOUNT:    { name: 'Duplicator',   nameRu: 'Удвоитель',   maxLevel: 3, bonuses: { amount: 1 } },
   MOVESPEED: { name: 'Wings',        nameRu: 'Крылья',      maxLevel: 5, bonuses: { moveSpeed: 0.05 } },
-  MAGNET:    { name: 'Attractorb',   nameRu: 'Магнит',      maxLevel: 5, bonuses: { magnet: 20 } },
   LUCK:      { name: 'Clover',       nameRu: 'Клевер',      maxLevel: 5, bonuses: { luck: 0.1 } },
-  GROWTH:    { name: 'Crown',        nameRu: 'Корона',      maxLevel: 5, bonuses: { growth: 0.1 } },
+  MAGNET:    { name: 'Attractorb',   nameRu: 'Магнит',      maxLevel: 5, bonuses: { magnet: 100 } },
+  GROWTH:    { name: 'Crown',        nameRu: 'Корона',      maxLevel: 3, bonuses: { xpDiscount: 0.1 } },
 };
 
 var EVOLUTION_MAP = {

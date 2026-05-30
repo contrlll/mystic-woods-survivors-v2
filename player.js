@@ -18,6 +18,7 @@ const Player = {
   luck: 1,
   magnet: 0,
   growth: 1,
+  xpDiscount: 0,
   armor: 0,
   regen: 0,
   animFrame: 0,
@@ -108,9 +109,10 @@ const Player = {
   },
 
   addXp(amount) {
+    var needed = Math.ceil(this.xpToNext * (1 - this.xpDiscount));
     this.xp += amount;
-    if (this.xp >= this.xpToNext) {
-      this.xp -= this.xpToNext;
+    if (this.xp >= needed) {
+      this.xp -= needed;
       this.level++;
       this.xpToNext = Math.floor(this.xpToNext * 1.4);
       Game.state = 'LEVELING';
