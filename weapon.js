@@ -15,24 +15,25 @@ function findClosestEnemy(x, y, range) {
   return closest;
 }
 
-function findEnemiesInRadius(x, y, radius) {
-  var result = [];
+function forEachEnemyInRadius(x, y, radius, fn) {
+  var r2 = radius * radius;
   for (var i = 0; i < Enemy.list.length; i++) {
     var e = Enemy.list[i];
     if (!e.alive) continue;
     var dx = e.x - x;
     var dy = e.y - y;
-    if (dx * dx + dy * dy < radius * radius) result.push(e);
+    if (dx * dx + dy * dy < r2) fn(e);
   }
-  return result;
 }
 
 function damageEnemy(e, dmg) {
   e.hp -= dmg;
-  if (e.hp <= 0) {
-    e.alive = false;
-    Player.kills++;
-    Enemy.spawnXpGem(e.x, e.y, e.xp);
+  if (e.hp <= 0 && !e.dying) {
+    e.dying = true;
+    e.deathTimer = 0.4;
+    if (typeof WeaponManager !== 'undefined') {
+      WeaponManager.addVfx({ type: 'death', x: e.x, y: e.y, timer: 0, duration: 0.3, scale: e.isBoss ? 2 : 1 });
+    }
   }
 }
 
@@ -41,8 +42,8 @@ var WEAPON_SPRITE_MAP = {
   fireball: 'crystalsword',
   throwingKnife: 'dagger',
   axe: 'doubleaxe',
-  lightning: null,
-  holyWater: null,
+  lightning: 'lightning',
+  holyWater: 'holyWater',
   bible: 'longsword',
 
   whip: 'flail',
@@ -51,9 +52,9 @@ var WEAPON_SPRITE_MAP = {
   deathSpiral: 'doubleaxe',
   thousandEdge: 'dagger',
   hellfire: 'crystalsword',
-  bora: null,
-  loop: null,
-  unholyVespers: null,
+  bora: 'bora',
+  loop: 'loop',
+  unholyVespers: 'unholyVespers',
 
 };
 
@@ -323,11 +324,12 @@ WEAPON_FACTORIES.holyWater = function() {
       var dmg = Math.ceil(10 * this.getStat('power') * Player.power) + WeaponManager.globalDamage;
       var zoneRadius = 50 * Player.area;
       var lifetime = (this.getStat('duration') / 1000) * Player.duration;
-           WeaponManager.addZone({
-             x: zx, y: zy, radius: zoneRadius,
-             damage: dmg, lifetime: Math.max(1, lifetime),
-             timer: 0, tickTimer: 0, tickInterval: 0.5,
-           });
+        WeaponManager.addZone({
+          x: Game.wrap(zx), y: Game.wrap(zy), radius: zoneRadius,
+          damage: dmg, lifetime: Math.max(1, lifetime),
+          timer: 0, tickTimer: 0, tickInterval: 0.5,
+          zoneType: 'holyWater',
+        });
     },
   });
 };
@@ -587,6 +589,7 @@ WEAPON_FACTORIES.bora = function() {
           x: zx, y: zy, radius: zoneRadius,
           damage: dmg, lifetime: Math.max(1, lifetime),
           timer: 0, tickTimer: 0, tickInterval: 0.4,
+          zoneType: 'bora',
         });
       }
     },
@@ -636,10 +639,10 @@ var WeaponManager = {
   globalDamage: 0,
 
   reset: function() {
-    this.weapons = [];
-    this.projectiles = [];
-    this.vfx = [];
-    this.zones = [];
+    this.weapons.length = 0;
+    this.projectiles.length = 0;
+    this.vfx.length = 0;
+    this.zones.length = 0;
     this.globalDamage = 0;
     this.addWeapon('throwingKnife');
   },
@@ -715,19 +718,45 @@ var WeaponManager = {
 
   addProjectile: function(cfg) {
     if (_currentWeaponId) cfg._weapon = _currentWeaponId;
+    cfg.alive = true;
+    for (var i = 0; i < this.projectiles.length; i++) {
+      if (!this.projectiles[i].alive) {
+        this.projectiles[i] = cfg;
+        return;
+      }
+    }
     this.projectiles.push(cfg);
   },
-  addVfx: function(cfg) { this.vfx.push(cfg); },
-  addZone: function(cfg) { this.zones.push(cfg); },
+  addVfx: function(cfg) {
+    cfg.alive = true;
+    for (var i = 0; i < this.vfx.length; i++) {
+      if (!this.vfx[i].alive) {
+        this.vfx[i] = cfg;
+        return;
+      }
+    }
+    this.vfx.push(cfg);
+  },
+  addZone: function(cfg) {
+    cfg.alive = true;
+    for (var i = 0; i < this.zones.length; i++) {
+      if (!this.zones[i].alive) {
+        this.zones[i] = cfg;
+        return;
+      }
+    }
+    this.zones.push(cfg);
+  },
 
   _updateProjectiles: function(dt) {
     var list = this.projectiles;
     for (var i = list.length - 1; i >= 0; i--) {
       var p = list[i];
+      if (!p.alive) continue;
 
       if (p.type === 'orbital') {
         p.timer += dt;
-        if (p.lifetime && p.timer >= p.lifetime) { list.splice(i, 1); continue; }
+        if (p.lifetime && p.timer >= p.lifetime) { p.alive = false; continue; }
         p.angle += p.speed * dt;
         p.x = Player.x + Math.cos(p.angle) * p.radius;
         p.y = Player.y + Math.sin(p.angle) * p.radius;
@@ -752,7 +781,7 @@ var WeaponManager = {
            p.x += p.vx * dt;
            p.y += p.vy * dt;
         p.distTraveled += Math.sqrt(p.vx * p.vx + p.vy * p.vy) * dt;
-        if (p.distTraveled >= p.maxDist) { list.splice(i, 1); continue; }
+        if (p.distTraveled >= p.maxDist) { p.alive = false; continue; }
         var target = findClosestEnemy(p.x, p.y, 250);
         if (target) {
           var tdx = target.x - p.x;
@@ -772,7 +801,7 @@ var WeaponManager = {
           var dy = p.y - e.y;
           if (dx * dx + dy * dy < 18 * 18) {
             damageEnemy(e, p.damage);
-            list.splice(i, 1);
+            p.alive = false;
             break;
           }
         }
@@ -798,7 +827,7 @@ var WeaponManager = {
           var bdx = Player.x - p.x;
           var bdy = Player.y - p.y;
           var bd = Math.sqrt(bdx * bdx + bdy * bdy);
-          if (bd < 20) { list.splice(i, 1); continue; }
+          if (bd < 20) { p.alive = false; continue; }
           p.vx = (bdx / bd) * p.speed;
           p.vy = (bdy / bd) * p.speed;
         }
@@ -819,7 +848,7 @@ var WeaponManager = {
         if (p.explosionRadius) {
           this._explode(p.x, p.y, p.explosionRadius, Math.ceil(p.damage * 0.4));
         }
-        list.splice(i, 1);
+        p.alive = false;
         continue;
       }
 
@@ -833,7 +862,7 @@ var WeaponManager = {
             damageEnemy(e, p.damage);
             p.hitEnemies.push(e);
             p.remainingPierce--;
-            if (p.remainingPierce <= 0) { list.splice(i, 1); break; }
+            if (p.remainingPierce <= 0) { p.alive = false; break; }
           }
         }
         continue;
@@ -853,7 +882,7 @@ var WeaponManager = {
             break;
           }
         }
-        if (hit) { list.splice(i, 1); continue; }
+        if (hit) { p.alive = false; continue; }
         continue;
       }
 
@@ -864,43 +893,62 @@ var WeaponManager = {
         var dy = p.y - e.y;
         if (dx * dx + dy * dy < 18 * 18) {
           damageEnemy(e, p.damage);
-          list.splice(i, 1);
+          p.alive = false;
           break;
         }
       }
     }
+    var wi = 0;
+    for (var ri = 0; ri < list.length; ri++) {
+      if (list[ri].alive) {
+        list[wi++] = list[ri];
+      }
+    }
+    list.length = wi;
   },
 
   _explode: function(x, y, radius, dmg) {
     this.addVfx({ type: 'explosion', x: x, y: y, timer: 0, duration: 0.3, maxRadius: radius });
-    var enemies = findEnemiesInRadius(x, y, radius);
-    for (var i = 0; i < enemies.length; i++) {
-      damageEnemy(enemies[i], dmg);
-    }
+    forEachEnemyInRadius(x, y, radius, function(e) {
+      damageEnemy(e, dmg);
+    });
   },
 
   _updateZones: function(dt) {
-    for (var i = this.zones.length - 1; i >= 0; i--) {
-      var z = this.zones[i];
+    var list = this.zones;
+    for (var i = list.length - 1; i >= 0; i--) {
+      var z = list[i];
+      if (!z.alive) continue;
       z.timer += dt;
       z.tickTimer += dt;
       if (z.tickTimer >= z.tickInterval) {
         z.tickTimer = 0;
-        var enemies = findEnemiesInRadius(z.x, z.y, z.radius);
-        for (var ei = 0; ei < enemies.length; ei++) {
-          damageEnemy(enemies[ei], z.damage);
-        }
+        forEachEnemyInRadius(z.x, z.y, z.radius, function(e) {
+          damageEnemy(e, z.damage);
+        });
       }
-      if (z.timer >= z.lifetime) this.zones.splice(i, 1);
+      if (z.timer >= z.lifetime) z.alive = false;
     }
+    var wi = 0;
+    for (var ri = 0; ri < list.length; ri++) {
+      if (list[ri].alive) list[wi++] = list[ri];
+    }
+    list.length = wi;
   },
 
   _updateVfx: function(dt) {
-    for (var i = this.vfx.length - 1; i >= 0; i--) {
-      var v = this.vfx[i];
+    var list = this.vfx;
+    for (var i = list.length - 1; i >= 0; i--) {
+      var v = list[i];
+      if (!v.alive) continue;
       v.timer += dt;
-      if (v.timer >= v.duration) this.vfx.splice(i, 1);
+      if (v.timer >= v.duration) v.alive = false;
     }
+    var wi = 0;
+    for (var ri = 0; ri < list.length; ri++) {
+      if (list[ri].alive) list[wi++] = list[ri];
+    }
+    list.length = wi;
   },
 
   _renderZones: function(ctx) {
@@ -908,11 +956,17 @@ var WeaponManager = {
       var z = this.zones[i];
       var alpha = 0.4 * (1 - z.timer / z.lifetime);
       if (alpha < 0) alpha = 0;
-      ctx.fillStyle = 'rgba(100, 180, 255, ' + alpha + ')';
+      var ztype = z.zoneType || 'holyWater';
+      var colors = {
+        holyWater: { fill: '100, 180, 255', stroke: '100, 180, 255' },
+        bora: { fill: '160, 100, 230', stroke: '180, 120, 255' },
+      };
+      var c = colors[ztype] || colors.holyWater;
+      ctx.fillStyle = 'rgba(' + c.fill + ', ' + alpha + ')';
       ctx.beginPath();
       ctx.arc(z.x, z.y, z.radius, 0, Math.PI * 2);
       ctx.fill();
-      ctx.strokeStyle = 'rgba(100, 180, 255, ' + (alpha * 1.5) + ')';
+      ctx.strokeStyle = 'rgba(' + c.stroke + ', ' + (alpha * 1.5) + ')';
       ctx.lineWidth = 2;
       ctx.stroke();
     }
@@ -1038,6 +1092,19 @@ var WeaponManager = {
         ctx.beginPath();
         ctx.arc(v.x, v.y, 60, sa - 0.6, sa + 0.6);
         ctx.stroke();
+      }
+      if (v.type === 'death') {
+        var dprogress = v.timer / v.duration;
+        var dscale = v.scale || 1;
+        var dalphas = 0.7 * (1 - dprogress);
+        for (var di = 0; di < 6; di++) {
+          var dangle = (di / 6) * Math.PI * 2 + v.timer * 4;
+          var ddist = 20 * dscale * dprogress;
+          var dpx = v.x + Math.cos(dangle) * ddist;
+          var dpy = v.y + Math.sin(dangle) * ddist;
+          ctx.fillStyle = 'rgba(200, 200, 200, ' + dalphas + ')';
+          ctx.beginPath(); ctx.arc(dpx, dpy, 2 * dscale * (1 - dprogress + 0.2), 0, Math.PI * 2); ctx.fill();
+        }
       }
     }
   },

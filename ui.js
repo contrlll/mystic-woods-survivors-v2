@@ -21,6 +21,7 @@ const UI = {
     this.drawHpBar(ctx);
     this.drawXpBar(ctx);
     this.drawStats(ctx);
+    this.drawMinimap(ctx);
     if (this.message) {
       ctx.save();
       ctx.fillStyle = 'rgba(0,0,0,0.5)';
@@ -70,6 +71,60 @@ const UI = {
     ctx.font = '11px monospace';
     ctx.textAlign = 'center';
     ctx.fillText(`Lv.${Player.level} ${Player.xp}/${Player.xpToNext} XP`, x + w / 2, y + 12);
+  },
+
+  drawMinimap(ctx) {
+    var mmSize = 150;
+    var margin = 16;
+    var mmX = Game.width - mmSize - margin;
+    var mmY = Game.height - mmSize - margin;
+    var scale = mmSize / Game.mapSize;
+
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.fillRect(mmX, mmY, mmSize, mmSize);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(mmX, mmY, mmSize, mmSize);
+
+    ctx.save();
+    ctx.translate(mmX, mmY);
+
+    var px = Player.x * scale;
+    var py = Player.y * scale;
+
+    for (var ei = 0; ei < Enemy.list.length; ei++) {
+      var e = Enemy.list[ei];
+      if (!e.alive) continue;
+      var ex = Game.unwrap(e.x, Player.x) * scale;
+      var ey = Game.unwrap(e.y, Player.y) * scale;
+      var edx = ex - px;
+      var edy = ey - py;
+      if (edx * edx + edy * edy > (mmSize * 0.7) * (mmSize * 0.7)) continue;
+      ctx.fillStyle = e.isElite ? '#ff0' : '#e22';
+      ctx.fillRect(ex - 1.5, ey - 1.5, 3, 3);
+    }
+
+    for (var gi = 0; gi < Enemy.xpGems.length; gi++) {
+      var g = Enemy.xpGems[gi];
+      if (!g.alive) continue;
+      var gx = Game.unwrap(g.x, Player.x) * scale;
+      var gy = Game.unwrap(g.y, Player.y) * scale;
+      var gdx = gx - px;
+      var gdy = gy - py;
+      if (gdx * gdx + gdy * gdy > (mmSize * 0.7) * (mmSize * 0.7)) continue;
+      ctx.fillStyle = '#8f8';
+      ctx.fillRect(gx - 1, gy - 1, 2, 2);
+    }
+
+    ctx.fillStyle = '#4f4';
+    ctx.beginPath();
+    ctx.arc(px, py, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    ctx.restore();
   },
 
   _weaponSpriteTag(spriteKey) {

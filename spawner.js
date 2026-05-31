@@ -29,7 +29,7 @@ const Spawner = {
       if (!hasBoss) {
         var bx = Player.x + (Math.random() - 0.5) * 600;
         var by = Player.y + (Math.random() - 0.5) * 600;
-        Enemy.list.push(Enemy.createBoss(bx, by));
+        Enemy.spawnBoss(bx, by);
         UI.showMessage('BOSS APPEARS!', 3);
       }
     }
@@ -66,7 +66,7 @@ const Spawner = {
       } while (attempts < 10 && (x - Player.x) * (x - Player.x) + (y - Player.y) * (y - Player.y) < 300 * 300);
       const difficulty = Math.floor(this.elapsedTime / 8);
       var type = Math.random() < 0.5 ? 'slime' : 'bat';
-      Enemy.list.push(Enemy.create(x, y, difficulty, type));
+      Enemy.spawn(x, y, difficulty, type);
     }
   },
 };

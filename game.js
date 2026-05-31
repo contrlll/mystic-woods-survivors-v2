@@ -112,6 +112,11 @@ const Game = {
       txPlant: 'assets/sprites/decor/tx_plant.png',
       txProps: 'assets/sprites/decor/tx_props.png',
       boss: 'assets/sprites/enemies/boss.png',
+      lightning: 'assets/sprites/weapons/lightning.png',
+      holyWater: 'assets/sprites/weapons/holyWater.png',
+      bora: 'assets/sprites/weapons/bora.png',
+      loop: 'assets/sprites/weapons/loop.png',
+      unholyVespers: 'assets/sprites/weapons/unholyVespers.png',
     };
     for (const [key, src] of Object.entries(assets)) {
       const img = new Image();
@@ -175,6 +180,12 @@ const Game = {
   },
 
   reset() {
+    Enemy.list.length = 0;
+    Enemy.xpGems.length = 0;
+    PassiveManager.reset();
+    Spawner.reset();
+    WeaponManager.reset();
+
     Player.dead = false;
     Player.xp = 0;
     Player.level = 1;
@@ -187,7 +198,6 @@ const Game = {
     Player.speed = 1;
     Player.duration = 1;
     Player.amount = 0;
-
     Player.magnet = 0;
     Player.growth = 1;
     Player.xpDiscount = 0;
@@ -197,11 +207,6 @@ const Game = {
     Player.hp = Player.maxHp;
     Player.x = 1500;
     Player.y = 1500;
-    Enemy.list = [];
-    Enemy.xpGems = [];
-    Spawner.reset();
-    WeaponManager.reset();
-    PassiveManager.reset();
     UI.reset();
     this.state = 'PLAYING';
   },
