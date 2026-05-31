@@ -125,6 +125,7 @@ const Game = {
       img.src = src;
       this.sprites[key] = img;
     }
+    this.spritePaths = assets;
   },
 
   generateDecorations: function() {

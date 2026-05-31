@@ -129,9 +129,13 @@ const UI = {
 
   _weaponSpriteTag(spriteKey) {
     if (!spriteKey) return '';
-    var s = Game.sprites[spriteKey];
-    if (!s) return '';
-    return `<img src="${s.src}" class="upgrade-weapon-img">`;
+    var path = Game.spritePaths && Game.spritePaths[spriteKey];
+    if (!path) {
+      var s = Game.sprites[spriteKey];
+      if (!s) return '';
+      path = s.src;
+    }
+    return `<img src="${path}" class="upgrade-weapon-img">`;
   },
 
   showUpgrades() {
