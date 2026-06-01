@@ -180,6 +180,7 @@ const UI = {
       amount:    'Количество +1',
       magnet:    'Магнит +100',
       growth:    'Требуется на 10% меньше опыта',
+      vampChance: 'Вампиризм 10%',
     };
 
     function passDescRu(pdef) {

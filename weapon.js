@@ -32,6 +32,9 @@ function forEachEnemyInRadius(x, y, radius, fn) {
 
 function damageEnemy(e, dmg) {
   e.hp -= dmg;
+  if (Player.vampChance > 0 && Math.random() < Player.vampChance) {
+    Player.hp = Math.min(Player.maxHp, Player.hp + 1);
+  }
   if (e.hp <= 0 && !e.dying) {
     e.dying = true;
     e.deathTimer = 0.4;
@@ -212,7 +215,8 @@ WEAPON_FACTORIES.throwingKnife = function() {
           x: Player.x, y: Player.y,
           vx: (dx / dist) * spd, vy: (dy / dist) * spd,
           damage: dmg, maxDist: range, distTraveled: 0,
-          remainingPierce: Math.max(1, this.getStat('penetrating')),
+          maxBounces: Math.max(1, this.getStat('penetrating')),
+          bounceCount: 0,
           hitEnemies: [],
         });
       }
@@ -739,6 +743,8 @@ var WeaponManager = {
   addProjectile: function(cfg) {
     if (_currentWeaponId) cfg._weapon = _currentWeaponId;
     cfg.alive = true;
+    cfg.maxBounces = cfg.maxBounces || 0;
+    cfg.bounceCount = cfg.bounceCount || 0;
     for (var i = 0; i < this.projectiles.length; i++) {
       if (!this.projectiles[i].alive) {
         this.projectiles[i] = cfg;
@@ -889,8 +895,43 @@ var WeaponManager = {
           if (dx * dx + dy * dy < 18 * 18) {
             damageEnemy(e, p.damage);
             p.hitEnemies.push(e);
-            p.remainingPierce--;
-            if (p.remainingPierce <= 0) { p.alive = false; break; }
+            if (p.maxBounces > 0) {
+              p.bounceCount++;
+              if (p.bounceCount > p.maxBounces) { p.alive = false; break; }
+              var nextTarget = null;
+              var nextDistSq = Infinity;
+              var bounceRangeSq = 300 * 300;
+              for (var je = 0; je < Enemy.list.length; je++) {
+                var ce = Enemy.list[je];
+                if (!ce.alive || p.hitEnemies.indexOf(ce) !== -1) continue;
+                var cex = Game.unwrap(ce.x, p.x);
+                var cey = Game.unwrap(ce.y, p.y);
+                var cdx = p.x - cex;
+                var cdy = p.y - cey;
+                var cdSq = cdx * cdx + cdy * cdy;
+                if (cdSq < nextDistSq && cdSq < bounceRangeSq) {
+                  nextDistSq = cdSq;
+                  nextTarget = ce;
+                }
+              }
+              if (nextTarget) {
+                var ntx = Game.unwrap(nextTarget.x, p.x);
+                var nty = Game.unwrap(nextTarget.y, p.y);
+                var ndx = ntx - p.x;
+                var ndy = nty - p.y;
+                var ndist = Math.sqrt(ndx * ndx + ndy * ndy);
+                var spd = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+                p.vx = (ndx / ndist) * spd;
+                p.vy = (ndy / ndist) * spd;
+                this.addVfx({ type: 'spark', x: p.x, y: p.y, timer: 0, duration: 0.15, vx: p.vx, vy: p.vy });
+              } else {
+                p.alive = false;
+                break;
+              }
+            } else {
+              p.remainingPierce--;
+              if (p.remainingPierce <= 0) { p.alive = false; break; }
+            }
           }
         }
         continue;
@@ -1136,6 +1177,17 @@ var WeaponManager = {
           var dpy = v.y + Math.sin(dangle) * ddist;
           ctx.fillStyle = 'rgba(200, 200, 200, ' + dalphas + ')';
           ctx.beginPath(); ctx.arc(dpx, dpy, 2 * dscale * (1 - dprogress + 0.2), 0, Math.PI * 2); ctx.fill();
+        }
+      }
+      if (v.type === 'spark') {
+        var sp = v.timer / v.duration;
+        for (var si = 0; si < 4; si++) {
+          var sa = Math.atan2(v.vy, v.vx) + (si - 1.5) * 0.8;
+          var sd = 15 * sp;
+          var sx = v.x + Math.cos(sa) * sd;
+          var sy = v.y + Math.sin(sa) * sd;
+          ctx.fillStyle = 'rgba(255,255,200,' + (0.8 * (1 - sp)) + ')';
+          ctx.beginPath(); ctx.arc(sx, sy, 3 * (1 - sp) + 1, 0, Math.PI * 2); ctx.fill();
         }
       }
     }

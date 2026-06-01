@@ -21,6 +21,7 @@ const Player = {
   xpDiscount: 0,
   armor: 0,
   regen: 0,
+  vampChance: 0,
   animFrame: 0,
   animTimer: 0,
   moving: false,

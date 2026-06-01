@@ -8,6 +8,7 @@ var PASSIVE_DEFS = {
 
   MAGNET:    { name: 'Attractorb',   nameRu: 'Магнит',      maxLevel: 5, bonuses: { magnet: 100 } },
   GROWTH:    { name: 'Crown',        nameRu: 'Корона',      maxLevel: 3, bonuses: { xpDiscount: 0.1 } },
+  VAMPIRISM: { name: 'Vampirism',    nameRu: 'Вампиризм',   maxLevel: 5, bonuses: { vampChance: 0.1 } },
 };
 
 var EVOLUTION_MAP = {
@@ -28,6 +29,7 @@ var PASSIVE_SPRITE_MAP = {
   AMOUNT: 'amount',
   MAGNET: 'magnet',
   GROWTH: 'growth',
+  VAMPIRISM: 'vampirism',
 };
 
 var PassiveManager = {

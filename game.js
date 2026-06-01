@@ -137,6 +137,7 @@ const Game = {
       amount: 'assets/sprites/weapons/amount.png',
       magnet: 'assets/sprites/weapons/magnet.png',
       growth: 'assets/sprites/weapons/growth.png',
+      vampirism: 'assets/sprites/weapons/vampirism.png',
     };
     for (const [key, src] of Object.entries(assets)) {
       const img = new Image();
