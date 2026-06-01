@@ -11,6 +11,8 @@ const Game = {
   accumulator: 0,
   fixedDt: 1 / 60,
   decorations: [],
+  nukeTimer: 0,
+  nukeFlash: 0,
 
   wrap: function(v) {
     var ms = this.mapSize;
@@ -138,6 +140,7 @@ const Game = {
       magnet: 'assets/sprites/weapons/magnet.png',
       growth: 'assets/sprites/weapons/growth.png',
       vampirism: 'assets/sprites/weapons/vampirism.png',
+      nuke: 'assets/sprites/weapons/nuke.png',
     };
     for (const [key, src] of Object.entries(assets)) {
       const img = new Image();
@@ -207,6 +210,8 @@ const Game = {
   reset() {
     Enemy.list.length = 0;
     Enemy.xpGems.length = 0;
+    Enemy.nukeItems.length = 0;
+    Enemy.pickupParticles.length = 0;
     PassiveManager.reset();
     Spawner.reset();
     WeaponManager.reset();
@@ -228,11 +233,14 @@ const Game = {
     Player.xpDiscount = 0;
     Player.armor = 0;
     Player.regen = 0;
+    Player.vampChance = 0;
     Player.maxHp = 10;
     Player.hp = Player.maxHp;
     Player.x = 1500;
     Player.y = 1500;
     UI.reset();
+    this.nukeTimer = 0;
+    this.nukeFlash = 0;
     this.state = 'PLAYING';
   },
 
@@ -245,6 +253,25 @@ const Game = {
     UI.gameTime += dt;
     if (UI.message) { UI.messageTimer -= dt; if (UI.messageTimer <= 0) { UI.message = null; } }
 
+    // Nuke timer
+    if (this.nukeTimer > 0) {
+      this.nukeTimer -= dt;
+      if (this.nukeTimer <= 0) {
+        this.nukeTimer = 0;
+        this.nukeFlash = 0.3;
+        for (var ei = 0; ei < Enemy.list.length; ei++) {
+          var e = Enemy.list[ei];
+          if (e.alive && !e.dying) {
+            e.dying = true;
+            e.deathTimer = 0.4;
+            if (typeof WeaponManager !== 'undefined') {
+              WeaponManager.addVfx({ type: 'death', x: e.x, y: e.y, timer: 0, duration: 0.3, scale: e.isBoss ? 2 : 1 });
+            }
+          }
+        }
+      }
+    }
+
     // Regen tick every 5s
     UI._regenTimer = (UI._regenTimer || 0) + dt;
     if (UI._regenTimer >= 5) {
@@ -254,6 +281,9 @@ const Game = {
         Player.hp = Math.min(Player.maxHp, Player.hp + Math.max(1, Math.ceil(regenAmt)));
       }
     }
+
+    // Nuke flash tick
+    if (this.nukeFlash > 0) this.nukeFlash -= dt;
 
     // Enemy contact damage with armor reduction
     for (const e of Enemy.list) {
@@ -301,8 +331,17 @@ const Game = {
     Enemy.renderAll(ctx);
     WeaponManager.render(ctx);
     Enemy.renderXpGems(ctx);
+    Enemy.renderNukeItems(ctx);
     Player.render(ctx);
     ctx.restore();
+    if (this.nukeTimer > 0) {
+      ctx.fillStyle = 'rgba(5, 5, 40, 0.45)';
+      ctx.fillRect(0, 0, this.width, this.height);
+    }
+    if (this.nukeFlash > 0) {
+      ctx.fillStyle = 'rgba(255, 255, 255, ' + Math.min(1, this.nukeFlash / 0.3) + ')';
+      ctx.fillRect(0, 0, this.width, this.height);
+    }
     UI.render(ctx);
   },
 

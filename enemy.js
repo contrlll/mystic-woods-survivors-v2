@@ -2,6 +2,7 @@ const Enemy = {
   list: [],
   xpGems: [],
   pickupParticles: [],
+  nukeItems: [],
 
   createBoss: function(x, y) {
     return {
@@ -63,6 +64,17 @@ const Enemy = {
     this.xpGems.push(g);
   },
 
+  spawnNukeItem(x, y) {
+    var ni = { x: x, y: y, life: 10, bob: 0, alive: true };
+    for (var i = 0; i < this.nukeItems.length; i++) {
+      if (!this.nukeItems[i].alive) {
+        this.nukeItems[i] = ni;
+        return;
+      }
+    }
+    this.nukeItems.push(ni);
+  },
+
   spawn(x, y, difficulty, type) {
     var e = this.create(x, y, difficulty, type);
     for (var i = 0; i < this.list.length; i++) {
@@ -112,6 +124,39 @@ const Enemy = {
       if (this.xpGems[gr].alive) this.xpGems[gw++] = this.xpGems[gr];
     }
     this.xpGems.length = gw;
+
+    for (let i = this.nukeItems.length - 1; i >= 0; i--) {
+      var ni = this.nukeItems[i];
+      if (!ni.alive) continue;
+      ni.life -= dt;
+      if (ni.life <= 0) { ni.alive = false; continue; }
+      ni.bob += dt * 3;
+      var nux = Game.unwrap(ni.x, Player.x);
+      var nuy = Game.unwrap(ni.y, Player.y);
+      var ndx = Player.x - nux;
+      var ndy = Player.y - nuy;
+      var ndistSq = ndx * ndx + ndy * ndy;
+      var npickupRadius = 150 + Player.magnet;
+      if (ndistSq < npickupRadius * npickupRadius) {
+        if (ndistSq < 400) {
+          Game.nukeTimer = 1.0;
+          ni.alive = false;
+        } else {
+          var ndist = Math.sqrt(ndistSq);
+          var nspeed = 300 + Player.magnet * 0.5;
+          ni.x += (ndx / ndist) * nspeed * dt;
+          ni.y += (ndy / ndist) * nspeed * dt;
+          ni.x = Game.wrap(ni.x);
+          ni.y = Game.wrap(ni.y);
+        }
+      }
+    }
+    var nw = 0;
+    for (var nr = 0; nr < this.nukeItems.length; nr++) {
+      if (this.nukeItems[nr].alive) this.nukeItems[nw++] = this.nukeItems[nr];
+    }
+    this.nukeItems.length = nw;
+
     for (var pi = this.pickupParticles.length - 1; pi >= 0; pi--) {
       var p = this.pickupParticles[pi];
       p.life -= dt;
@@ -129,6 +174,7 @@ const Enemy = {
           e.alive = false;
           Player.kills++;
           Enemy.spawnXpGem(e.x, e.y, e.xp);
+          if (Math.random() < 0.1) { Enemy.spawnNukeItem(e.x, e.y); }
         }
         continue;
       }
@@ -187,6 +233,36 @@ const Enemy = {
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.size * palpha, 0, Math.PI * 2);
       ctx.fill();
+    }
+  },
+
+  renderNukeItems: function(ctx) {
+    for (var i = 0; i < this.nukeItems.length; i++) {
+      var ni = this.nukeItems[i];
+      if (!ni.alive) continue;
+      var rx = Game.unwrap(ni.x, Player.x);
+      var ry = Game.unwrap(ni.y, Player.y);
+      var bob = Math.sin(ni.bob) * 2;
+      ctx.save();
+      ctx.translate(rx - ni.x, ry - ni.y);
+      ctx.fillStyle = 'rgba(50, 100, 255, 0.25)';
+      ctx.beginPath();
+      ctx.arc(ni.x, ni.y + bob, 12, 0, Math.PI * 2);
+      ctx.fill();
+      var sprite = Game.sprites.nuke;
+      if (sprite && sprite.width > 0) {
+        ctx.drawImage(sprite, ni.x - 16, ni.y - 16 + bob, 32, 32);
+      } else {
+        ctx.fillStyle = '#4488ff';
+        ctx.beginPath();
+        ctx.moveTo(ni.x, ni.y - 10 + bob);
+        ctx.lineTo(ni.x + 8, ni.y + bob);
+        ctx.lineTo(ni.x, ni.y + 10 + bob);
+        ctx.lineTo(ni.x - 8, ni.y + bob);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.restore();
     }
   },
 
