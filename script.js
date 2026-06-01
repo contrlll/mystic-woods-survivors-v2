@@ -4,6 +4,8 @@ Game.loadAssets();
 
 function startGame() {
   document.getElementById('mainMenu').style.display = 'none';
+  var music = document.getElementById('bgMusic');
+  if (music.paused) music.play();
   if (Game.state === 'GAME_OVER') {
     Game.reset();
   } else {
