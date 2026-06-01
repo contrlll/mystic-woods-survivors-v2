@@ -288,6 +288,12 @@ const UI = {
   showGameOver() {
     const overlay = document.getElementById('upgradeOverlay');
     if (!overlay) return;
+    var gp = document.getElementById('gameplayMusic');
+    if (gp) { gp.pause(); gp.currentTime = 0; }
+    var rage = document.getElementById('rageMusic');
+    if (rage) { rage.pause(); rage.currentTime = 0; }
+    var menu = document.getElementById('menuMusic');
+    if (menu) { menu.currentTime = 0; menu.play(); }
     const mins = Math.floor(this.gameTime / 60);
     const secs = Math.floor(this.gameTime % 60);
     overlay.innerHTML = `<div class="gameover-title">GAME OVER</div>

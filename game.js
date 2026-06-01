@@ -191,6 +191,7 @@ const Game = {
     this.camera.x = Player.x - this.width / 2;
     this.camera.y = Player.y - this.height / 2;
     this.generateDecorations();
+    Enemy.spawnRageItem(Player.x + 80, Player.y);
     this.lastTime = performance.now();
     if (!this._started) {
       this._started = true;
@@ -272,8 +273,10 @@ const Game = {
     Player.moveSpeed *= 3;
     Player.invuln = true;
     Spawner.rageMul = 20;
-    var audio = document.getElementById('rageMusic');
-    if (audio) { audio.currentTime = 0; audio.play(); }
+    var gp = document.getElementById('gameplayMusic');
+    if (gp && !gp.paused) { gp.pause(); }
+    var rage = document.getElementById('rageMusic');
+    if (rage) { rage.currentTime = 0; rage.play(); }
   },
 
   update(dt) {
@@ -298,8 +301,10 @@ const Game = {
         Player.moveSpeed = Player._savedMoveSpeed;
         Player.invuln = false;
         Spawner.rageMul = 1;
-        var audio = document.getElementById('rageMusic');
-        if (audio) { audio.pause(); audio.currentTime = 0; }
+        var rage = document.getElementById('rageMusic');
+        if (rage) { rage.pause(); rage.currentTime = 0; }
+        var gp = document.getElementById('gameplayMusic');
+        if (gp) { gp.currentTime = 0; gp.play(); }
       }
     }
 
