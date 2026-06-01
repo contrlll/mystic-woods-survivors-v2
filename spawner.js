@@ -64,7 +64,9 @@ const Spawner = {
         }
         attempts++;
       } while (attempts < 10 && (x - Player.x) * (x - Player.x) + (y - Player.y) * (y - Player.y) < 300 * 300);
-      const difficulty = Math.floor(this.elapsedTime / 8);
+      const timeDiff = Math.floor(this.elapsedTime / 8);
+      const levelDiff = Math.floor(Player.level * 0.25);
+      const difficulty = timeDiff + levelDiff;
       var type = Math.random() < 0.5 ? 'slime' : 'bat';
       Enemy.spawn(x, y, difficulty, type);
     }
