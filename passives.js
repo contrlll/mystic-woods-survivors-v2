@@ -1,12 +1,9 @@
 var PASSIVE_DEFS = {
   POWER:     { name: 'Might',        nameRu: 'Мощь',        maxLevel: 5, bonuses: { power: 0.1 } },
-  ARMOR:     { name: 'Armor',        nameRu: 'Броня',       maxLevel: 3, bonuses: { armor: 1 } },
   MAXHEALTH: { name: 'Hollow Heart', nameRu: 'Пустое сердце', maxLevel: 3, bonuses: { maxHpMult: 0.1 } },
   REGEN:     { name: 'Recovery',     nameRu: 'Восстановление', maxLevel: 5, bonuses: { regen: 0.1 } },
   COOLDOWN:  { name: 'Empty Tome',   nameRu: 'Пустой фолиант', maxLevel: 5, bonuses: { cooldown: -0.025 } },
-  AREA:      { name: 'Candelabrador',nameRu: 'Канделябр',   maxLevel: 5, bonuses: { area: 0.05 } },
   SPEED:     { name: 'Bracer',       nameRu: 'Наручи',      maxLevel: 5, bonuses: { speed: 0.1 } },
-  DURATION:  { name: 'Spellbinder',  nameRu: 'Заклинатель',  maxLevel: 5, bonuses: { duration: 0.15 } },
   AMOUNT:    { name: 'Duplicator',   nameRu: 'Удвоитель',   maxLevel: 3, bonuses: { amount: 1 } },
 
   MAGNET:    { name: 'Attractorb',   nameRu: 'Магнит',      maxLevel: 5, bonuses: { magnet: 100 } },
@@ -16,24 +13,18 @@ var PASSIVE_DEFS = {
 var EVOLUTION_MAP = {
   magicArrow:    { synergy: 'COOLDOWN',  evoId: 'holyMissile' },
   whip:          { synergy: 'MAXHEALTH', evoId: 'bloodyTear' },
-  axe:           { synergy: 'AREA',      evoId: 'deathSpiral' },
   throwingKnife: { synergy: 'SPEED',     evoId: 'thousandEdge' },
   lightning:     { synergy: 'AMOUNT',    evoId: 'loop' },
   fireball:      { synergy: 'POWER',     evoId: 'hellfire' },
   holyWater:     { synergy: 'MAGNET',    evoId: 'bora' },
-  bible:         { synergy: 'DURATION',  evoId: 'unholyVespers' },
-
 };
 
 var PASSIVE_SPRITE_MAP = {
   POWER: 'might',
-  ARMOR: 'armor',
   MAXHEALTH: 'maxHealth',
   REGEN: 'regen',
   COOLDOWN: 'emptyTome',
-  AREA: 'area',
   SPEED: 'speed',
-  DURATION: 'duration',
   AMOUNT: 'amount',
   MAGNET: 'magnet',
   GROWTH: 'growth',

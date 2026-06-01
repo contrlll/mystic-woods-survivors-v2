@@ -228,7 +228,6 @@ WEAPON_FACTORIES.axe = function() {
       { amount: 1 }, { power: 2 }, { penetrating: 2 },
       { amount: 1 }, { power: 2 }, { penetrating: 2 }, { power: 2 },
     ],
-    evoSynergy: 'AREA', evoId: 'deathSpiral',
     attack: function() {
       var range = 300 * Player.area;
       var target = findClosestEnemy(Player.x, Player.y, range);
@@ -362,7 +361,6 @@ WEAPON_FACTORIES.bible = function() {
       { amount: 1 },
     ],
     hitDelay: 1.7,
-    evoSynergy: 'DURATION', evoId: 'unholyVespers',
     attack: function() {
       var dmg = Math.ceil(10 * this.getStat('power') * Player.power) + WeaponManager.globalDamage;
       var amt = this.getStat('amount') + Player.amount;

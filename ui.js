@@ -170,25 +170,16 @@ const UI = {
 
   getRandomUpgrades(count) {
     var pool = [];
-    var oldUpgrades = [
-      { type: 'stat', id: 'damage', name: 'Damage', icon: '+', desc: '+1 к урону', nameRu: 'Урон' },
-      { type: 'stat', id: 'range', name: 'Range', icon: '<->', desc: '+40 к дальности', nameRu: 'Дальность' },
-      { type: 'stat', id: 'maxHp', name: 'Max HP', icon: '*', desc: '+5 макс. HP и лечение', nameRu: 'Макс. HP' },
-    ];
-    pool = pool.concat(oldUpgrades);
 
     var PASSIVE_DESC_RU = {
       power:     'Урон +10%',
-      armor:     'Броня +1',
       maxHpMult: 'Макс. HP +10%',
       regen:     'Регенерация +0.1',
       cooldown:  'Перезарядка -2.5%',
-      area:      'Область +5%',
       speed:     'Скорость снарядов +10%',
-      duration:  'Длительность +15%',
       amount:    'Количество +1',
-      magnet:    'Магнит +20',
-      growth:    'Рост +10%',
+      magnet:    'Магнит +100',
+      growth:    'Требуется на 10% меньше опыта',
     };
 
     function passDescRu(pdef) {
@@ -227,9 +218,9 @@ const UI = {
 
     // Add unowned non-evolved weapons
     for (var key in WEAPON_FACTORIES) {
-      if (key === 'holyMissile' || key === 'bloodyTear' || key === 'deathSpiral' ||
+      if (key === 'holyMissile' || key === 'bloodyTear' ||
           key === 'thousandEdge' || key === 'hellfire' || key === 'bora' ||
-          key === 'loop' || key === 'unholyVespers') continue;
+          key === 'loop') continue;
       if (!WeaponManager.hasWeapon(key)) {
         var def = WEAPON_FACTORIES[key]();
         pool.push({ type: 'weaponNew', id: key, name: def.nameRu, icon: '\u2694', desc: 'Новое оружие', _sprite: WEAPON_SPRITE_MAP[key] });
@@ -290,12 +281,7 @@ const UI = {
       PassiveManager.add(id);
       return;
     }
-    // Old stat upgrades
-    switch (id) {
-      case 'damage': WeaponManager.globalDamage += 1; break;
-      case 'range': WeaponManager.globalDamage += 0.5; break;
-      case 'maxHp': Player.maxHp += 5; Player.hp = Player.maxHp; break;
-    }
+
   },
 
   showGameOver() {
