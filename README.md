@@ -67,7 +67,8 @@ Their combined expertise resulted in a game that pushes the boundaries of what's
 
 ## 📱 Play Now
 
-Open `index.html` in any modern web browser to play. The game works best on desktop browsers but is also playable on mobile devices.
+- **GitHub Pages**: [https://contrlll.github.io/mystic-woods-survivors-v2/](https://contrlll.github.io/mystic-woods-survivors-v2/)
+- Or open `index.html` in any modern web browser to play. The game works best on desktop browsers but is also playable on mobile devices.
 
 ## 🔜 Future Plans
 
