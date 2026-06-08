@@ -1,85 +1,64 @@
 # Mystic Woods Survivors
 
-A vampire survivors-inspired game with toroidal (wrap-around) world mechanics, pixel-art graphics, and local multiplayer-ready design.
+Вдохновлённая Vampire Survivors игра с тороидальным (зацикленным) миром, пиксельной графикой и автоматической стрельбой.
 
-## 🎮 Game Overview
+## 🎮 Об игре
 
-Mystic Woods Survivors is a fast-paced action roguelite where you survive endless waves of monsters by collecting experience, leveling up, and choosing powerful upgrades. The game features a unique wrapping world mechanic where the map edges connect like a torus (donut), creating interesting strategic possibilities for positioning and combat.
+Mystic Woods Survivors — это быстрый экшен-рогалик, где вы выживаете среди бесконечных волн монстров, собираете опыт, повышаете уровень и выбираете мощные улучшения. Карта замкнута в тор — края соединяются, создавая интересные тактические возможности.
 
-## 🌟 Features
+## 🌟 Особенности
 
-- **Toroidal World**: The game world wraps both horizontally and vertically - move off one edge and appear on the opposite side
-- **16 Unique Weapons**: Each with distinct mechanics and upgrade paths
-- **11 Passive Items**: Stat boosts that synergize with your weapons
-- **Pixel Art Graphics**: Custom 32x32 pixel-art sprites for all weapons and passives
-- **Progressive Difficulty**: Increasingly challenging enemy waves with bosses
-- **Local Co-op Ready**: Designed for easy addition of second player
-- **Responsive Design**: Works on desktop and mobile browsers
+- **Тороидальный мир**: карта зациклена по горизонтали и вертикали — выходя за край, появляешься с противоположной стороны
+- **16 уникальных видов оружия**: каждое со своей механикой и путями улучшения
+- **8 пассивных предметов**: усиления характеристик, синергирующие с оружием
+- **Пиксельная графика**: кастомные спрайты 32x32 для всего оружия и пассивок
+- **Прогрессивная сложность**: волны врагов становятся всё сложнее, появляются боссы
+- **Адаптивный дизайн**: работает на десктопе и мобильных браузерах
 
-## 🎯 How to Play
+## 🎯 Как играть
 
-1. Move your character with WASD or arrow keys
-2. Weapons auto-fire at nearby enemies
-3. Collect experience gems from defeated enemies to level up
-4. Choose upgrades when you level up to enhance your build
-5. Survive as long as possible against increasingly difficult waves
-6. When you die, spend collected gold on permanent upgrades (future feature)
+1. Двигайтесь с помощью WASD или стрелок
+2. Оружие стреляет автоматически по ближайшим врагам
+3. Собирайте сферы опыта с поверженных врагов для повышения уровня
+4. Выбирайте улучшения при повышении уровня
+5. Выживайте как можно дольше
+6. После смерти можно начать заново
 
-## 🛠️ Development
+## 🛠️ Разработка
 
-This game was built with vanilla JavaScript and HTML5 Canvas. No external dependencies or frameworks were used.
+Игра написана на чистом JavaScript и HTML5 Canvas без внешних зависимостей.
 
-### Project Structure
+### Структура проекта
 
 ```
 game/
-├── index.html          # Main HTML file
-├── style.css           # All styling
-├── script.js           # Game initialization and UI
-├── player.js           # Player logic
-├── enemy.js            # Enemy AI and behavior
-├── spawner.js          # Enemy spawning system
-├── weapon.js           # Weapon systems and attacks
-├── passives.js         # Passive item systems
-├── ui.js               # Rendering and visual effects
+├── index.html          # Главный HTML
+├── style.css           # Стили
+├── script.js           # Инициализация и UI
+├── player.js           # Логика игрока
+├── enemy.js            # ИИ врагов
+├── spawner.js          # Система спавна
+├── weapon.js           # Системы оружия
+├── passives.js         # Пассивные предметы
+├── ui.js               # Рендеринг и эффекты
 └── assets/
-    ├── photos/         # Developer photos
     └── sprites/
-        └── weapons/    # All weapon and passive pixel-art (33 sprites)
+        └── weapons/    # Все спрайты (32 шт.)
 ```
 
-### Key Technical Features
+### Ключевые технические решения
 
-- **Toroidal Math**: Custom `Game.wrap()` and `Game.unwrap()` functions handle world wrapping
-- **Entity Management**: All game objects (player, enemies, projectiles) managed in centralized lists
-- **Weapon Factory Pattern**: Each weapon is defined as a factory function returning configuration object
-- **Passive Synergy System**: Items grant stat bonuses and can trigger weapon evolutions
-- **Visual Effects**: Particle systems, screen shake, and Flash effects for impact
+- **Тороидальная математика**: функции `Game.wrap()` и `Game.unwrap()` обрабатывают зацикливание мира
+- **Управление сущностями**: все объекты (игрок, враги, снаряды) хранятся в централизованных списках
+- **Фабрика оружия**: каждое оружие определяется функцией-фабрикой
+- **Система пассивок**: предметы дают бонусы к характеристикам и могут эволюционировать оружие
+- **Визуальные эффекты**: частицы, тряска экрана, вспышки
 
-## 👥 Developers
-
-This game was created by two exceptional programmers:
-
-- **Артём** - Backend architecture, game systems, and core mechanics
-- **Салават** - Frontend implementation, UI/UX, and visual polish
-
-Their combined expertise resulted in a game that pushes the boundaries of what's possible in browser-based gaming.
-
-## 📱 Play Now
+## 📱 Играть
 
 - **GitHub Pages**: [https://contrlll.github.io/mystic-woods-survivors-v2/](https://contrlll.github.io/mystic-woods-survivors-v2/)
-- Or open `index.html` in any modern web browser to play. The game works best on desktop browsers but is also playable on mobile devices.
-
-## 🔜 Future Plans
-
-- Permanent upgrade system between runs
-- Additional characters with unique starting loadouts
-- More enemy types and boss battles
-- Local two-player co-op mode
-- Soundtrack and enhanced audio effects
-- Leaderboards and achievements
+- Или откройте `index.html` в любом современном браузере
 
 ---
 
-*Mystic Woods Survivors v1.0*  
-*Created with passion by Артём and Салават*
+*Mystic Woods Survivors v1.0*
