@@ -20,12 +20,4 @@ function startGame() {
   }
 }
 
-function showAbout() {
-  document.getElementById('mainMenu').style.display = 'none';
-  document.getElementById('aboutOverlay').style.display = 'flex';
-}
 
-function hideAbout() {
-  document.getElementById('aboutOverlay').style.display = 'none';
-  document.getElementById('mainMenu').style.display = 'flex';
-}
